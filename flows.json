@@ -1,1 +1,93 @@
-[]
+[
+    {
+        "id": "dba90e030d634245",
+        "type": "tab",
+        "label": "toggle",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "07fe14384084aea3",
+        "type": "http in",
+        "z": "dba90e030d634245",
+        "name": "",
+        "url": "/toggle",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 160,
+        "wires": [
+            [
+                "7ced98a9f59ab6d8"
+            ]
+        ]
+    },
+    {
+        "id": "d9edf61ac4a09e9e",
+        "type": "http response",
+        "z": "dba90e030d634245",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 790,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "f2f37fa63a2f1560",
+        "type": "template",
+        "z": "dba90e030d634245",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "mustache",
+        "template": "{ \n    \"stats\": \"{{feedback}}\"\n}",
+        "output": "json",
+        "x": 620,
+        "y": 160,
+        "wires": [
+            [
+                "d9edf61ac4a09e9e"
+            ]
+        ]
+    },
+    {
+        "id": "7ced98a9f59ab6d8",
+        "type": "function",
+        "z": "dba90e030d634245",
+        "name": "handleRequestApi",
+        "func": "\n\nif (isNaN(msg.payload.status) || typeof msg.payload.status != \"number\" || msg.payload.status < 0 || msg.payload.status > 1 ) { \n    msg.feedback = \"Paylod needs to be between 0 and 1\"\n    msg.statusCode = 400\n    return msg;\n  \n} \nmsg.feedback = \"Success\"\nmsg.statusCode = 200\nmsg.payload = msg.payload.status\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 160,
+        "wires": [
+            [
+                "f2f37fa63a2f1560",
+                "cb205a290a641b28"
+            ]
+        ]
+    },
+    {
+        "id": "cb205a290a641b28",
+        "type": "rpi-gpio out",
+        "z": "dba90e030d634245",
+        "name": "",
+        "pin": "18",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 620,
+        "y": 260,
+        "wires": []
+    }
+]
