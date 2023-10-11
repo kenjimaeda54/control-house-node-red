@@ -3,6 +3,14 @@
         "id": "dba90e030d634245",
         "type": "tab",
         "label": "toggle",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "79e4de440e4532d8",
+        "type": "tab",
+        "label": "Turns on or off and after a while it changes",
         "disabled": false,
         "info": "",
         "env": []
@@ -59,7 +67,7 @@
         "type": "function",
         "z": "dba90e030d634245",
         "name": "handleRequestApi",
-        "func": "\n\nif (isNaN(msg.payload.status) || typeof msg.payload.status != \"number\" || msg.payload.status < 0 || msg.payload.status > 1 ) { \n    msg.feedback = \"Paylod needs to be between 0 and 1\"\n    msg.statusCode = 400\n    return msg;\n  \n} \nmsg.feedback = \"Success\"\nmsg.statusCode = 200\nmsg.payload = msg.payload.status\n\nreturn msg;",
+        "func": "\n\nif (isNaN(msg.payload.status) || typeof msg.payload.status != \"number\" || msg.payload.status < 0 || msg.payload.status > 1 ) { \n    msg.feedback = \"Status needs to be between 0 and 1\"\n    msg.statusCode = 400\n    return msg;\n  \n} \nmsg.feedback = \"Success\"\nmsg.statusCode = 200\nmsg.payload = msg.payload.status\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -89,5 +97,108 @@
         "x": 620,
         "y": 260,
         "wires": []
+    },
+    {
+        "id": "3bbe9918e4af28f4",
+        "type": "http in",
+        "z": "79e4de440e4532d8",
+        "name": "",
+        "url": "/timer_on_off",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "f5bb412cac3ece96"
+            ]
+        ]
+    },
+    {
+        "id": "70ed4cce5a2b3a2a",
+        "type": "http response",
+        "z": "79e4de440e4532d8",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 770,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "bf27073eef820ea4",
+        "type": "template",
+        "z": "79e4de440e4532d8",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "mustache",
+        "template": "{ \n    \"stats\": \"{{feedback}}\"\n}",
+        "output": "json",
+        "x": 600,
+        "y": 100,
+        "wires": [
+            [
+                "70ed4cce5a2b3a2a"
+            ]
+        ]
+    },
+    {
+        "id": "f5bb412cac3ece96",
+        "type": "function",
+        "z": "79e4de440e4532d8",
+        "name": "handleRequestApi",
+        "func": "\n\n/**\n* @param {number} value\n*/\nfunction validateIsNotNumber(value) { \n\n return isNaN(value) || typeof value != \"number\"\n}\n\n\nif (validateIsNotNumber(msg.payload.status) ||\n    validateIsNotNumber(msg.payload.time)\n    ) { \n    msg.feedback = \"Time and status need be number\"\n    msg.statusCode = 400\n    return msg;\n  \n}  \n\nif (msg.payload.time < 1) { \n    msg.feedback = \"Time must be equal to 1 or greater\"\n    msg.statusCode = 400\n    return msg;\n}\n\nif (msg.payload.status < 0 ||\n    msg.payload.status > 1 ) { \n    msg.feedback = \"Status needs to be between 0 and 1\"\n    msg.statusCode = 400\n    return msg;\n}\n\nlet time = msg.payload.time * 1000\n\nmsg.feedback = \"Success\"\nmsg.statusCode = 200\nmsg.payload = msg.payload.status\nmsg.time = time\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 100,
+        "wires": [
+            [
+                "bf27073eef820ea4",
+                "62db074d084756f4"
+            ]
+        ]
+    },
+    {
+        "id": "3f08ac83c0cef2eb",
+        "type": "rpi-gpio out",
+        "z": "79e4de440e4532d8",
+        "name": "",
+        "pin": "18",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 700,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "62db074d084756f4",
+        "type": "function",
+        "z": "79e4de440e4532d8",
+        "name": "function 1",
+        "func": "\nfunction clear() {\n   clearInterval(interval)\n}\n\n\nlet interval = setInterval(() =>{\n   msg.payload = !msg.payload\n   node.send(msg)\n   clear()\n   node.done()\n}, msg.time)\n\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 240,
+        "wires": [
+            [
+                "3f08ac83c0cef2eb"
+            ]
+        ]
     }
 ]
