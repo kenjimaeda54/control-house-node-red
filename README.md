@@ -3,7 +3,7 @@ Este sowftaer e um backend para ser consumido no mobile Control House
 
 ## End Points
 
-- <hostname>:porta/timer_on_off
+- hostname:porta/timer_on_off
 
 
 ```text
@@ -20,7 +20,7 @@ Este sowftaer e um backend para ser consumido no mobile Control House
 ```
 
 ##
-- <hostname>:porta/toggle
+- hostname:porta/toggle
 
 ```text
 // parametros no body em json
