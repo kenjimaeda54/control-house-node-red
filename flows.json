@@ -11,6 +11,14 @@
         "id": "79e4de440e4532d8",
         "type": "tab",
         "label": "Turns on or off and after a while it changes",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f74abee3047ca46a",
+        "type": "tab",
+        "label": "Flasher",
         "disabled": false,
         "info": "",
         "env": []
@@ -150,7 +158,7 @@
         "type": "function",
         "z": "79e4de440e4532d8",
         "name": "handleRequestApi",
-        "func": "\n\n/**\n* @param {number} value\n*/\nfunction validateIsNotNumber(value) { \n\n return isNaN(value) || typeof value != \"number\"\n}\n\n\nif (validateIsNotNumber(msg.payload.status) ||\n    validateIsNotNumber(msg.payload.time)\n    ) { \n    msg.feedback = \"Time and status need be number\"\n    msg.statusCode = 400\n    return msg;\n  \n}  \n\nif (msg.payload.time < 1) { \n    msg.feedback = \"Time must be equal to 1 or greater\"\n    msg.statusCode = 400\n    return msg;\n}\n\nif (msg.payload.status < 0 ||\n    msg.payload.status > 1 ) { \n    msg.feedback = \"Status needs to be between 0 and 1\"\n    msg.statusCode = 400\n    return msg;\n}\n\nlet time = msg.payload.time * 1000\n\nmsg.feedback = \"Success\"\nmsg.statusCode = 200\nmsg.payload = msg.payload.status\nmsg.time = time\n\nreturn msg;",
+        "func": "\n\n/**\n* @param {number} value\n*/\nfunction validateIsNotNumber(value) { \n\n return isNaN(value) || typeof value != \"number\"\n}\n\n\nif (validateIsNotNumber(msg.payload.status) ||\n    validateIsNotNumber(msg.payload.time)\n    ) { \n    msg.feedback = \"Time and status need be number\"\n    msg.statusCode = 400\n    return msg;\n  \n}  \n\nif (msg.payload.time < 1) { \n    msg.feedback = \"Time must be equal to 1 or greater\"\n    msg.statusCode = 400\n    return msg;\n}\n\nif (msg.payload.status < 0 ||\n    msg.payload.status > 1 ) { \n    msg.feedback = \"Status needs to be between 0 and 1\"\n    msg.statusCode = 400\n    return msg;\n}\n\nlet time = msg.payload.time * 1000\n\nmsg.feedback = \"Success\"\nmsg.statusCode = 200\nmsg.payload = msg.payload.status\nmsg.delay = time\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -162,7 +170,8 @@
         "wires": [
             [
                 "bf27073eef820ea4",
-                "62db074d084756f4"
+                "3f08ac83c0cef2eb",
+                "cd564cdee6d6c680"
             ]
         ]
     },
@@ -177,27 +186,156 @@
         "freq": "",
         "out": "out",
         "bcm": true,
-        "x": 700,
+        "x": 860,
         "y": 240,
         "wires": []
     },
     {
-        "id": "62db074d084756f4",
+        "id": "cd564cdee6d6c680",
+        "type": "delay",
+        "z": "79e4de440e4532d8",
+        "name": "",
+        "pauseType": "delayv",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 440,
+        "y": 240,
+        "wires": [
+            [
+                "b4c570f29f895409"
+            ]
+        ]
+    },
+    {
+        "id": "b4c570f29f895409",
         "type": "function",
         "z": "79e4de440e4532d8",
-        "name": "function 1",
-        "func": "\nfunction clear() {\n   clearInterval(interval)\n}\n\n\nlet interval = setInterval(() =>{\n   msg.payload = !msg.payload\n   node.send(msg)\n   clear()\n   node.done()\n}, msg.time)\n\n\nreturn msg;",
+        "name": "handlePayload",
+        "func": "msg.payload = !msg.payload\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 520,
+        "x": 640,
         "y": 240,
         "wires": [
             [
                 "3f08ac83c0cef2eb"
+            ]
+        ]
+    },
+    {
+        "id": "013d684718cdc2fe",
+        "type": "http in",
+        "z": "f74abee3047ca46a",
+        "name": "",
+        "url": "/flasher",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 90,
+        "y": 80,
+        "wires": [
+            [
+                "f13c5b79cc3ae544"
+            ]
+        ]
+    },
+    {
+        "id": "efb1649a0e6dd2de",
+        "type": "http response",
+        "z": "f74abee3047ca46a",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 750,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "3362697c0b599e9a",
+        "type": "template",
+        "z": "f74abee3047ca46a",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "mustache",
+        "template": "{ \n    \"stats\": \"{{feedback}}\"\n}",
+        "output": "json",
+        "x": 580,
+        "y": 80,
+        "wires": [
+            [
+                "efb1649a0e6dd2de"
+            ]
+        ]
+    },
+    {
+        "id": "f13c5b79cc3ae544",
+        "type": "function",
+        "z": "f74abee3047ca46a",
+        "name": "handleRequestApi",
+        "func": "\n\n/**\n* @param {number} value\n*/\nfunction validateIsNotNumber(value) { \n\n return isNaN(value) || typeof value != \"number\"\n}\n\n\nif ( validateIsNotNumber(msg.payload.time)) { \n    msg.feedback = \"Time need be number\"\n    msg.statusCode = 400\n    return msg;\n  \n}  \n\nif (msg.payload.time < 1) { \n    msg.feedback = \"Time must be equal to 1 or greater\"\n    msg.statusCode = 400\n    return msg;\n}\n\n \n\nlet time = msg.payload.time * 1000\n\nmsg.feedback = \"Success\"\nmsg.statusCode = 200\nmsg.payload = 1\nmsg.delay = time\n\nflow.set(\"test4\",msg.payload)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 80,
+        "wires": [
+            [
+                "3362697c0b599e9a",
+                "818a87f2102d86be",
+                "bec414f44d38252f"
+            ]
+        ]
+    },
+    {
+        "id": "818a87f2102d86be",
+        "type": "rpi-gpio out",
+        "z": "f74abee3047ca46a",
+        "name": "",
+        "pin": "18",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 860,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "bec414f44d38252f",
+        "type": "function",
+        "z": "f74abee3047ca46a",
+        "name": "function 1",
+        "func": "\n\nsetInterval(()=>{\n   let status = flow.get(\"test4\")\n   msg.payload = !status\n   flow.set(\"test4\",msg.payload)\n   node.send(msg)\n   node.done()\n   \n},msg.delay)\n\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 300,
+        "wires": [
+            [
+                "818a87f2102d86be"
             ]
         ]
     }
