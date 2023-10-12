@@ -1,5 +1,5 @@
 ## Control_House
-Este sowftaer e um backend para ser consumido no mobile Control House
+Este software e um backend para ser consumido no mobile Control House
 
 ## End Points
 - [Referencia](https://nodered.org/docs/getting-started/raspberrypi)
